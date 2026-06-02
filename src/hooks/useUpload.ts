@@ -78,11 +78,13 @@ export function useUpload() {
 
     const hasFirstName = Array.from(headerMap.values()).includes('firstName');
     const hasPhone = Array.from(headerMap.values()).includes('phone');
+    const hasNotes = Array.from(headerMap.values()).includes('notes');
 
-    if (!hasFirstName || !hasPhone) {
+    if (!hasFirstName || !hasPhone || !hasNotes) {
       const missing: string[] = [];
       if (!hasFirstName) missing.push('FirstName');
       if (!hasPhone) missing.push('Phone');
+      if (!hasNotes) missing.push('Notes');
       setParseError(
         `Your file is missing required columns: ${missing.join(', ')}. Expected: FirstName, Phone, Notes`
       );
