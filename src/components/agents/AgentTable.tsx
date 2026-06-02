@@ -238,7 +238,8 @@ export function AgentTable({
       </div>
 
       {/* Table */}
-      <Table>
+      <div className="overflow-x-auto w-full pb-2">
+        <Table className="min-w-[800px]">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -287,7 +288,8 @@ export function AgentTable({
             ))
           )}
         </TableBody>
-      </Table>
+        </Table>
+      </div>
     </div>
   );
 }

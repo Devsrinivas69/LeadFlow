@@ -206,7 +206,7 @@ export function AgentSlideOver({
           >
             <div className="flex h-full flex-col">
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+              <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-4">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">
                     {isEdit ? 'Edit Agent' : 'Add New Agent'}
@@ -226,7 +226,7 @@ export function AgentSlideOver({
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
+              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6">
                 <div className="space-y-5">
                   {serverError && (
                     <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
@@ -438,7 +438,7 @@ export function AgentSlideOver({
               </form>
 
               {/* Footer */}
-              <div className="border-t border-slate-200 px-6 py-4 flex gap-3 justify-end">
+              <div className="border-t border-slate-200 px-4 sm:px-6 py-4 flex gap-3 justify-end">
                 <Button
                   type="button"
                   variant="outline"

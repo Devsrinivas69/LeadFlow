@@ -12,8 +12,8 @@ export default function DashboardLayout({
     <AuthProvider>
       <div className="flex min-h-screen bg-slate-50">
         <Sidebar />
-        <main className="flex-1 ml-[240px]">
-          <div className="max-w-[1200px] mx-auto p-6 lg:p-8">
+        <main className="flex-1 lg:ml-[240px] pt-16 lg:pt-0">
+          <div className="max-w-[1200px] mx-auto p-4 sm:p-6 lg:p-8">
             {children}
           </div>
         </main>

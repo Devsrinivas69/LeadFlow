@@ -145,7 +145,7 @@ export default function DashboardPage() {
           variants={container}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
         >
           {statCards.map((card) => (
             <motion.div key={card.label} variants={item}>
@@ -242,15 +242,15 @@ export default function DashboardPage() {
           <p className="mt-1 text-sm text-slate-500 max-w-sm mx-auto">
             Start by adding agents, then upload a CSV file to distribute leads across your team.
           </p>
-          <div className="mt-6 flex gap-3 justify-center">
-            <Link href="/dashboard/agents">
-              <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors cursor-pointer">
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/dashboard/agents" className="w-full sm:w-auto">
+              <button className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors cursor-pointer">
                 <Users className="h-4 w-4" />
                 Add Agents
               </button>
             </Link>
-            <Link href="/dashboard/upload">
-              <button className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md hover:bg-indigo-700 transition-colors cursor-pointer">
+            <Link href="/dashboard/upload" className="w-full sm:w-auto">
+              <button className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-md hover:bg-indigo-700 transition-colors cursor-pointer">
                 <FileSpreadsheet className="h-4 w-4" />
                 Upload Leads
               </button>

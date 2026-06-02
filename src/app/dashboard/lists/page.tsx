@@ -129,33 +129,33 @@ export default function ListsPage() {
     >
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
             placeholder="Search batches..."
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
-            className="pl-9"
+            className="pl-9 w-full"
           />
         </div>
-        <div className="flex gap-2">
-          <div className="relative">
+        <div className="flex flex-row gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="pl-9 w-40"
+              className="pl-9 w-full sm:w-40"
               placeholder="From"
             />
           </div>
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="pl-9 w-40"
+              className="pl-9 w-full sm:w-40"
               placeholder="To"
             />
           </div>
@@ -192,8 +192,9 @@ export default function ListsPage() {
         </div>
       ) : (
         <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-          <Table>
-            <TableHeader>
+          <div className="overflow-x-auto w-full pb-2">
+            <Table className="min-w-[800px]">
+              <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-10" />
                 <TableHead>Batch</TableHead>
@@ -325,8 +326,9 @@ export default function ListsPage() {
                                           </Badge>
                                         </div>
                                       </div>
-                                      <Table>
-                                        <TableHeader>
+                                      <div className="overflow-x-auto w-full">
+                                        <Table className="min-w-[500px]">
+                                          <TableHeader>
                                           <TableRow className="hover:bg-transparent">
                                             <TableHead className="text-xs">
                                               First Name
@@ -367,8 +369,9 @@ export default function ListsPage() {
                                               </TableCell>
                                             </TableRow>
                                           )}
-                                        </TableBody>
-                                      </Table>
+                                          </TableBody>
+                                        </Table>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
@@ -386,8 +389,9 @@ export default function ListsPage() {
                   </React.Fragment>
                 );
               })}
-            </TableBody>
-          </Table>
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
     </PageContainer>

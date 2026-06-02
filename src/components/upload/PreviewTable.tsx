@@ -57,66 +57,68 @@ export function PreviewTable({ rows, maxRows = 10 }: PreviewTableProps) {
 
       {/* Table */}
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-        <TooltipProvider>
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="w-12">#</TableHead>
-                <TableHead>First Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Notes</TableHead>
-                <TableHead className="w-20 text-center">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {displayRows.map((row, i) => (
-                <TableRow
-                  key={i}
-                  className={
-                    !row.isValid
-                      ? 'bg-red-50/50 hover:bg-red-50'
-                      : ''
-                  }
-                >
-                  <TableCell className="text-slate-400 font-mono text-xs">
-                    {row.rowIndex + 1}
-                  </TableCell>
-                  <TableCell
-                    className={`font-medium ${
-                      !row.firstName ? 'text-red-500 italic' : 'text-slate-900'
-                    }`}
-                  >
-                    {row.firstName || '(empty)'}
-                  </TableCell>
-                  <TableCell className="font-mono text-sm text-slate-600">
-                    {row.phone || '(empty)'}
-                  </TableCell>
-                  <TableCell className="text-slate-500 max-w-[200px] truncate">
-                    {row.notes || '—'}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {row.isValid ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500 mx-auto" />
-                    ) : (
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <XCircle className="h-5 w-5 text-red-500 mx-auto" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <ul className="text-xs space-y-0.5">
-                            {row.errors.map((err, ei) => (
-                              <li key={ei}>• {err}</li>
-                            ))}
-                          </ul>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </TableCell>
+        <div className="overflow-x-auto w-full pb-2">
+          <TooltipProvider>
+            <Table className="min-w-[800px]">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>First Name</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Notes</TableHead>
+                  <TableHead className="w-20 text-center">Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TooltipProvider>
+              </TableHeader>
+              <TableBody>
+                {displayRows.map((row, i) => (
+                  <TableRow
+                    key={i}
+                    className={
+                      !row.isValid
+                        ? 'bg-red-50/50 hover:bg-red-50'
+                        : ''
+                    }
+                  >
+                    <TableCell className="text-slate-400 font-mono text-xs">
+                      {row.rowIndex + 1}
+                    </TableCell>
+                    <TableCell
+                      className={`font-medium ${
+                        !row.firstName ? 'text-red-500 italic' : 'text-slate-900'
+                      }`}
+                    >
+                      {row.firstName || '(empty)'}
+                    </TableCell>
+                    <TableCell className="font-mono text-sm text-slate-600">
+                      {row.phone || '(empty)'}
+                    </TableCell>
+                    <TableCell className="text-slate-500 max-w-[200px] truncate">
+                      {row.notes || '—'}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {row.isValid ? (
+                        <CheckCircle2 className="h-5 w-5 text-emerald-500 mx-auto" />
+                      ) : (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <XCircle className="h-5 w-5 text-red-500 mx-auto" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <ul className="text-xs space-y-0.5">
+                              {row.errors.map((err, ei) => (
+                                <li key={ei}>• {err}</li>
+                              ))}
+                            </ul>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TooltipProvider>
+        </div>
       </div>
     </div>
   );
