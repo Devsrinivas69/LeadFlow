@@ -69,7 +69,6 @@ const userSchema = new Schema<IUserDocument>(
 );
 
 // Indexes
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1, isActive: 1 });
 
 const User: Model<IUserDocument> =

@@ -57,7 +57,6 @@ const distributedListSchema = new Schema<IDistributedListDocument>(
 
 // Indexes for query patterns
 distributedListSchema.index({ agentId: 1, uploadedAt: -1 });
-distributedListSchema.index({ uploadBatchId: 1 });
 distributedListSchema.index({ agentId: 1, uploadBatchId: 1 });
 
 const DistributedList: Model<IDistributedListDocument> =
