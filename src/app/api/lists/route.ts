@@ -94,6 +94,7 @@ export async function GET(
         batchLabel: leads[0]?.batchLabel,
         uploadedAt: leads[0]?.uploadedAt,
         totalRows: leads.length,
+        columnLabels: (leads[0] as any)?.columnLabels || undefined,
         agents: Array.from(agentMap.entries()).map(([aid, data]) => ({
           agentId: aid,
           name: agentNameMap.get(aid) || 'Unknown Agent',

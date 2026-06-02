@@ -97,6 +97,7 @@ export async function POST(
       phone: item.phone,
       notes: item.notes || undefined,
       extraColumns: item.extraColumns || undefined,
+      columnLabels: body.columnLabels || undefined,
       rowIndex: item.rowIndex,
       uploadedAt: now,
     }));

@@ -94,11 +94,15 @@ export default function ListsPage() {
     const allLeads: Record<string, string>[] = [];
     for (const agent of detail.agents) {
       for (const lead of agent.leads) {
+        const fnKey = detail.columnLabels?.firstName || 'FirstName';
+        const pKey = detail.columnLabels?.phone || 'Phone';
+        const nKey = detail.columnLabels?.notes || 'Notes';
+
         const row: Record<string, string> = {
           Agent: agent.name,
-          FirstName: lead.firstName,
-          Phone: lead.phone,
-          Notes: lead.notes || '',
+          [fnKey]: lead.firstName,
+          [pKey]: lead.phone,
+          [nKey]: lead.notes || '',
         };
         for (const key of extraKeys) {
           row[key] = lead.extraColumns?.[key] || '';
@@ -339,9 +343,9 @@ export default function ListsPage() {
                                               <Table className="min-w-[500px]">
                                                 <TableHeader>
                                                   <TableRow className="hover:bg-transparent">
-                                                    <TableHead className="text-xs">First Name</TableHead>
-                                                    <TableHead className="text-xs">Phone</TableHead>
-                                                    <TableHead className="text-xs">Notes</TableHead>
+                                                    <TableHead className="text-xs">{detail.columnLabels?.firstName || 'First Name'}</TableHead>
+                                                    <TableHead className="text-xs">{detail.columnLabels?.phone || 'Phone'}</TableHead>
+                                                    <TableHead className="text-xs">{detail.columnLabels?.notes || 'Notes'}</TableHead>
                                                     {/* Dynamic extra column headers */}
                                                     {agentExtraKeys.map((col) => (
                                                       <TableHead key={col} className="text-xs text-indigo-600">

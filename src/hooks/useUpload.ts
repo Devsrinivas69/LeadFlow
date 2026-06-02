@@ -256,6 +256,7 @@ export function useUpload() {
             rowIndex: r.rowIndex,
           })),
           batchLabel,
+          columnLabels,
         };
 
         const res = await fetch('/api/upload', {

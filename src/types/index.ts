@@ -29,6 +29,7 @@ export interface IDistributedList {
   phone: string;
   notes?: string;
   extraColumns?: Record<string, string>;
+  columnLabels?: Record<string, string>;
   rowIndex: number;
   uploadedAt: Date;
 }
@@ -120,6 +121,7 @@ export interface BatchDetail {
   batchLabel?: string;
   uploadedAt: Date;
   totalRows: number;
+  columnLabels?: Record<string, string>;
   agents: Array<{
     agentId: string;
     name: string;

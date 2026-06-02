@@ -49,6 +49,13 @@ export const uploadRequestSchema = z.object({
     .max(100, 'Batch label must be at most 100 characters')
     .optional()
     .transform((v) => (v ? v.trim() : undefined)),
+  columnLabels: z
+    .object({
+      firstName: z.string(),
+      phone: z.string(),
+      notes: z.string(),
+    })
+    .optional(),
 });
 
 export type UploadRowInput = z.infer<typeof uploadRowSchema>;

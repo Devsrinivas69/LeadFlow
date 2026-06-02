@@ -42,6 +42,10 @@ const distributedListSchema = new Schema<IDistributedListDocument>(
       type: Schema.Types.Mixed,
       default: undefined,
     },
+    columnLabels: {
+      type: Schema.Types.Mixed,
+      default: undefined,
+    },
     rowIndex: {
       type: Number,
       required: [true, 'Row index is required'],
