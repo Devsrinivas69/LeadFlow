@@ -214,3 +214,55 @@ export async function GET(
     );
   }
 }
+
+// DELETE /api/lists?batchId=... — Delete a batch (admin only)
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const batchId = searchParams.get('batchId');
+    const { userId, role } = await getSession(request);
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'UNAUTHORIZED', message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    if (role !== 'admin') {
+      return NextResponse.json(
+        { success: false, error: 'FORBIDDEN', message: 'Only admins can delete lists' },
+        { status: 403 }
+      );
+    }
+
+    if (!batchId) {
+      return NextResponse.json(
+        { success: false, error: 'BAD_REQUEST', message: 'Batch ID is required' },
+        { status: 400 }
+      );
+    }
+
+    await dbConnect();
+
+    const result = await DistributedList.deleteMany({ uploadBatchId: batchId });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json(
+        { success: false, error: 'NOT_FOUND', message: 'Batch not found or already deleted' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: true, message: `Successfully deleted batch` },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error('[Lists Delete Error]:', error);
+    return NextResponse.json(
+      { success: false, error: 'SERVER_ERROR', message: 'An unexpected error occurred while deleting' },
+      { status: 500 }
+    );
+  }
+}

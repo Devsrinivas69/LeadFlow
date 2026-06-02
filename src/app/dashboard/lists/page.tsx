@@ -9,8 +9,10 @@ import {
   Download,
   FileSpreadsheet,
   Loader2,
+  Trash2,
 } from 'lucide-react';
 import Papa from 'papaparse';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +29,7 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import type { ApiResponse, BatchSummary, BatchDetail } from '@/types';
 
 export default function ListsPage() {
+  const { user } = useAuth();
   const [batches, setBatches] = useState<BatchSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
@@ -119,6 +122,28 @@ export default function ListsPage() {
     link.download = `batch_${detail.uploadBatchId.slice(0, 8)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const deleteBatch = async (batchId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this list? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/lists?batchId=${batchId}`, {
+        method: 'DELETE',
+      });
+      const data: ApiResponse = await res.json();
+      if (data.success) {
+        setBatches((prev) => prev.filter((b) => b.uploadBatchId !== batchId));
+        if (expandedBatch === batchId) setExpandedBatch(null);
+      } else {
+        alert(data.error || 'Failed to delete batch');
+      }
+    } catch {
+      alert('Failed to delete batch due to a network error');
+    }
   };
 
   const filteredBatches = batches.filter((b) => {
@@ -258,20 +283,33 @@ export default function ListsPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {detail && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                exportBatchCSV(detail);
-                              }}
-                              className="h-8 w-8"
-                              title="Export CSV"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          )}
+                          <div className="flex items-center gap-1">
+                            {detail && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  exportBatchCSV(detail);
+                                }}
+                                className="h-8 w-8 text-slate-500 hover:text-slate-900"
+                                title="Export CSV"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {user?.role === 'admin' && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => deleteBatch(batch.uploadBatchId, e)}
+                                className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
+                                title="Delete List"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
 
