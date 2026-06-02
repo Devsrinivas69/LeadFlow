@@ -36,7 +36,7 @@ export function useUpload() {
 
   // ─── Row validation ─────────────────────────────────────────────────────────
   const validateRow = (
-    row: { firstName?: string; phone?: string; notes?: string },
+    row: { firstName?: string; phone?: string; notes?: string; extraColumns?: Record<string, string> },
     index: number
   ): ValidatedRow => {
     const errors: string[] = [];
@@ -55,6 +55,7 @@ export function useUpload() {
       firstName,
       phone,
       notes: notes || undefined,
+      extraColumns: row.extraColumns,   // ← preserve ALL extra columns
       rowIndex: index,
       isValid: errors.length === 0,
       errors,
