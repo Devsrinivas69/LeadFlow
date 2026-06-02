@@ -21,9 +21,14 @@ import type { ValidatedRow } from '@/types';
 interface PreviewTableProps {
   rows: ValidatedRow[];
   maxRows?: number;
+  columnLabels?: { firstName: string; phone: string; notes: string };
 }
 
-export function PreviewTable({ rows, maxRows = 10 }: PreviewTableProps) {
+export function PreviewTable({
+  rows,
+  maxRows = 10,
+  columnLabels = { firstName: 'First Name', phone: 'Phone', notes: 'Notes' },
+}: PreviewTableProps) {
   const displayRows = rows.slice(0, maxRows);
   const validCount = rows.filter((r) => r.isValid).length;
   const invalidCount = rows.filter((r) => !r.isValid).length;
@@ -92,9 +97,9 @@ export function PreviewTable({ rows, maxRows = 10 }: PreviewTableProps) {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-12">#</TableHead>
-                  <TableHead>First Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Notes</TableHead>
+                  <TableHead>{columnLabels.firstName}</TableHead>
+                  <TableHead>{columnLabels.phone}</TableHead>
+                  <TableHead>{columnLabels.notes}</TableHead>
                   {/* Dynamic extra column headers */}
                   {extraColumnNames.map((col) => (
                     <TableHead key={col} className="text-indigo-600">

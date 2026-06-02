@@ -25,6 +25,7 @@ export default function UploadPage() {
     uploadResult,
     parseError,
     mappingResult,
+    columnLabels,
     parseFile,
     confirmMapping,
     uploadRows,
@@ -110,7 +111,7 @@ export default function UploadPage() {
 
         {step === 'preview' && (
           <div className="space-y-6">
-            <PreviewTable rows={rows} maxRows={10} />
+            <PreviewTable rows={rows} maxRows={10} columnLabels={columnLabels} />
 
             <div className="flex gap-3 justify-end">
               <Button variant="outline" onClick={reset}>

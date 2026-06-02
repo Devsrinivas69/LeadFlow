@@ -30,6 +30,12 @@ export function useUpload() {
   // Raw data held until column mapping is confirmed
   const [pendingRawRows, setPendingRawRows] = useState<RawRow[]>([]);
   const [mappingResult, setMappingResult] = useState<MappingResult | null>(null);
+  // Original CSV header names for the 3 canonical fields (shown in PreviewTable)
+  const [columnLabels, setColumnLabels] = useState<{
+    firstName: string;
+    phone: string;
+    notes: string;
+  }>({ firstName: 'First Name', phone: 'Phone', notes: 'Notes' });
 
   const validRows = rows.filter((r) => r.isValid);
   const invalidRows = rows.filter((r) => !r.isValid);
@@ -105,6 +111,16 @@ export function useUpload() {
 
         return validateRow(mapped, index);
       });
+
+      // Build column labels from the inverted headerMap so the
+      // preview table shows the ORIGINAL CSV header names
+      const labels = { firstName: 'First Name', phone: 'Phone', notes: 'Notes' };
+      for (const [originalHeader, field] of headerMap.entries()) {
+        if (field === 'firstName') labels.firstName = originalHeader;
+        if (field === 'phone') labels.phone = originalHeader;
+        if (field === 'notes') labels.notes = originalHeader;
+      }
+      setColumnLabels(labels);
 
       setRows(validated);
       setParseError(null);
@@ -280,6 +296,7 @@ export function useUpload() {
     setUploading(false);
     setPendingRawRows([]);
     setMappingResult(null);
+    setColumnLabels({ firstName: 'First Name', phone: 'Phone', notes: 'Notes' });
   }, []);
 
   return {
@@ -294,6 +311,7 @@ export function useUpload() {
     uploadResult,
     parseError,
     mappingResult,
+    columnLabels,
     parseFile,
     confirmMapping,
     uploadRows,
