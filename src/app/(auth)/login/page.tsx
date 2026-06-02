@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { ApiResponse, LoginResponse } from '@/types';
+import Link from 'next/link';
 
 function LoginContent() {
   const router = useRouter();
@@ -20,6 +21,8 @@ function LoginContent() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showExpiredBanner, setShowExpiredBanner] = useState(expired);
+  const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
+  const [checkingSetup, setCheckingSetup] = useState(true);
 
   useEffect(() => {
     if (expired) {
@@ -27,6 +30,23 @@ function LoginContent() {
       return () => clearTimeout(timer);
     }
   }, [expired]);
+
+  useEffect(() => {
+    async function checkSetup() {
+      try {
+        const res = await fetch('/api/auth/setup-status');
+        const data = await res.json();
+        if (data.success && data.data) {
+          setHasAdmin(data.data.hasAdmin);
+        }
+      } catch (err) {
+        console.error('Failed to check setup status', err);
+      } finally {
+        setCheckingSetup(false);
+      }
+    }
+    checkSetup();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,10 +146,31 @@ function LoginContent() {
             <span className="text-2xl font-bold text-slate-900">LeadFlow</span>
           </div>
 
-          <h2 className="text-2xl font-bold text-slate-900">Welcome back</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Sign in to your account to continue
-          </p>
+          {checkingSetup ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            </div>
+          ) : hasAdmin === false ? (
+            <div className="text-center space-y-6 py-6">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 mb-6">
+                <Zap className="h-8 w-8 text-indigo-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900">Welcome to LeadFlow</h2>
+              <p className="text-slate-600">
+                No administrator account found. Create your first admin account to manage your team.
+              </p>
+              <Button asChild className="w-full h-11 text-base mt-8">
+                <Link href="/admin/register">
+                  Create Admin Account
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold text-slate-900">Welcome back</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Sign in to your account to continue
+              </p>
 
           {/* Expired Session Banner */}
           {showExpiredBanner && (
@@ -211,7 +252,16 @@ function LoginContent() {
                 'Sign in'
               )}
             </Button>
+            
+            <p className="text-center text-sm text-slate-500 mt-4">
+              Need to create another admin?{' '}
+              <Link href="/admin/register" className="text-indigo-600 hover:underline">
+                Register Admin
+              </Link>
+            </p>
           </form>
+          </>
+          )}
 
           <p className="mt-8 text-center text-xs text-slate-400">
             LeadFlow — Internal Sales Operations Platform

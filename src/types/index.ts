@@ -11,6 +11,7 @@ export interface IUser {
   role: UserRole;
   mobileNumber: string;
   isActive: boolean;
+  createdBy?: Types.ObjectId;
   lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;

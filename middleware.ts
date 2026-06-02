@@ -28,14 +28,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   console.log('[DEBUG MIDDLEWARE] Running for:', pathname);
 
-  // Skip auth routes (login)
-  if (pathname === '/api/auth/login') {
+  // Skip auth routes (login, register, setup check)
+  if (pathname.startsWith('/api/auth/')) {
     return NextResponse.next();
   }
 
   // Check if route needs protection
   const isProtectedPage = pathname.startsWith('/dashboard');
-  const isProtectedApi = pathname.startsWith('/api/') && pathname !== '/api/auth/login';
+  const isProtectedApi = pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/');
 
   if (!isProtectedPage && !isProtectedApi) {
     return NextResponse.next();

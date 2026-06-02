@@ -12,9 +12,16 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Sa
     const { searchParams } = new URL(request.url);
     const activeOnly = searchParams.get('activeOnly') === 'true';
 
+    const { userId, role } = await getSession(request);
+
     await dbConnect();
 
     const filter: Record<string, unknown> = { role: 'agent' };
+    
+    if (role === 'admin' && userId) {
+      filter.createdBy = userId;
+    }
+
     if (activeOnly) {
       filter.isActive = true;
     }
@@ -47,7 +54,7 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Sa
 // POST /api/agents — Create agent
 export async function POST(request: Request): Promise<NextResponse<ApiResponse<SafeUser>>> {
   try {
-    const { role } = await getSession(request);
+    const { role, userId } = await getSession(request);
 
     if (role !== 'admin') {
       return NextResponse.json(
@@ -99,6 +106,7 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<S
       role: 'agent',
       mobileNumber,
       isActive: true,
+      createdBy: userId,
     });
 
     // Return without password

@@ -36,6 +36,13 @@ const userSchema = new Schema<IUserDocument>(
       },
       default: 'agent',
     },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: function(this: any) {
+        return this.role === 'agent';
+      },
+    },
     mobileNumber: {
       type: String,
       required: [true, 'Mobile number is required'],
