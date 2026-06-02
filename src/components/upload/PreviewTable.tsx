@@ -28,10 +28,26 @@ export function PreviewTable({ rows, maxRows = 10 }: PreviewTableProps) {
   const validCount = rows.filter((r) => r.isValid).length;
   const invalidCount = rows.filter((r) => !r.isValid).length;
 
+  // Collect all unique extra column names across all rows (preserves insertion order)
+  const extraColumnNames: string[] = [];
+  const seen = new Set<string>();
+  for (const row of rows) {
+    if (row.extraColumns) {
+      for (const key of Object.keys(row.extraColumns)) {
+        if (!seen.has(key)) {
+          seen.add(key);
+          extraColumnNames.push(key);
+        }
+      }
+    }
+  }
+
+  const totalColumns = 3 + extraColumnNames.length; // firstName + phone + notes + extras
+
   return (
     <div className="space-y-4">
       {/* Summary Bar */}
-      <div className="flex items-center gap-4 rounded-lg bg-slate-50 border border-slate-200 px-4 py-3">
+      <div className="flex items-center gap-4 rounded-lg bg-slate-50 border border-slate-200 px-4 py-3 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
           <span className="text-sm font-medium text-slate-700">
@@ -48,6 +64,19 @@ export function PreviewTable({ rows, maxRows = 10 }: PreviewTableProps) {
         <span className="text-sm text-slate-500">
           {rows.length} total rows
         </span>
+        <div className="h-4 w-px bg-slate-300" />
+        <span className="text-sm text-slate-500">
+          {totalColumns} column{totalColumns !== 1 ? 's' : ''} detected
+        </span>
+        {extraColumnNames.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {extraColumnNames.map((col) => (
+              <Badge key={col} variant="secondary" className="text-xs">
+                {col}
+              </Badge>
+            ))}
+          </div>
+        )}
         {rows.length > maxRows && (
           <span className="text-xs text-slate-400">
             (showing first {maxRows})
@@ -66,6 +95,12 @@ export function PreviewTable({ rows, maxRows = 10 }: PreviewTableProps) {
                   <TableHead>First Name</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Notes</TableHead>
+                  {/* Dynamic extra column headers */}
+                  {extraColumnNames.map((col) => (
+                    <TableHead key={col} className="text-indigo-600">
+                      {col}
+                    </TableHead>
+                  ))}
                   <TableHead className="w-20 text-center">Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -95,6 +130,15 @@ export function PreviewTable({ rows, maxRows = 10 }: PreviewTableProps) {
                     <TableCell className="text-slate-500 max-w-[200px] truncate">
                       {row.notes || '—'}
                     </TableCell>
+                    {/* Dynamic extra column cells */}
+                    {extraColumnNames.map((col) => (
+                      <TableCell
+                        key={col}
+                        className="text-slate-600 max-w-[200px] truncate"
+                      >
+                        {row.extraColumns?.[col] || '—'}
+                      </TableCell>
+                    ))}
                     <TableCell className="text-center">
                       {row.isValid ? (
                         <CheckCircle2 className="h-5 w-5 text-emerald-500 mx-auto" />

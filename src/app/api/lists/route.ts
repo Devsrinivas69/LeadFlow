@@ -57,6 +57,7 @@ export async function GET(
             firstName: string;
             phone: string;
             notes?: string;
+            extraColumns?: Record<string, string>;
             rowIndex: number;
           }>;
         }
@@ -71,6 +72,7 @@ export async function GET(
           firstName: lead.firstName,
           phone: lead.phone,
           notes: lead.notes,
+          extraColumns: (lead as any).extraColumns,
           rowIndex: lead.rowIndex,
         });
       }

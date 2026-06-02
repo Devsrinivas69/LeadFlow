@@ -61,16 +61,47 @@ export function useUpload() {
     };
   };
 
-  // ─── Convert raw rows using a confirmed header map ──────────────────────────
+  // Convert raw rows using a confirmed header map
   const applyMapping = useCallback(
     (rawRows: RawRow[], headerMap: Map<string, CanonicalField>) => {
+      // Collect which original headers are canonical
+      const canonicalHeaders = new Set(headerMap.keys());
+
       const validated = rawRows.map((raw, index) => {
-        const mapped: { firstName?: string; phone?: string; notes?: string } = {};
+        const mapped: {
+          firstName?: string;
+          phone?: string;
+          notes?: string;
+          extraColumns?: Record<string, string>;
+        } = {};
+
+        // Extract canonical fields
         for (const [originalHeader, field] of headerMap.entries()) {
           if (field === 'firstName') mapped.firstName = raw[originalHeader];
           if (field === 'phone') mapped.phone = raw[originalHeader];
           if (field === 'notes') mapped.notes = raw[originalHeader];
         }
+
+        // Collect ALL remaining columns as extraColumns
+        const extra: Record<string, string> = {};
+        for (const [header, value] of Object.entries(raw)) {
+          if (!canonicalHeaders.has(header)) {
+            extra[header] = value ?? '';
+          }
+        }
+        if (Object.keys(extra).length > 0) {
+          mapped.extraColumns = extra;
+        }
+
+        // Log detected columns (dev aid)
+        if (index === 0) {
+          const allHeaders = Object.keys(raw);
+          console.log('[Upload] Detected columns:', allHeaders);
+          console.log('[Upload] Total columns found:', allHeaders.length);
+          console.log('[Upload] Canonical mapping:', Object.fromEntries(headerMap));
+          console.log('[Upload] Extra columns:', Object.keys(extra));
+        }
+
         return validateRow(mapped, index);
       });
 
@@ -204,6 +235,7 @@ export function useUpload() {
             firstName: r.firstName,
             phone: r.phone,
             notes: r.notes,
+            extraColumns: r.extraColumns,
             rowIndex: r.rowIndex,
           })),
           batchLabel,

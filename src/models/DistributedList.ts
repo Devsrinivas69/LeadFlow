@@ -36,6 +36,12 @@ const distributedListSchema = new Schema<IDistributedListDocument>(
       type: String,
       trim: true,
     },
+    // Stores all extra columns from the uploaded file that don't map to
+    // the 3 canonical fields. Uses Mixed so any key-value shape is accepted.
+    extraColumns: {
+      type: Schema.Types.Mixed,
+      default: undefined,
+    },
     rowIndex: {
       type: Number,
       required: [true, 'Row index is required'],

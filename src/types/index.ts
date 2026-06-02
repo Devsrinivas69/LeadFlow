@@ -28,6 +28,7 @@ export interface IDistributedList {
   firstName: string;
   phone: string;
   notes?: string;
+  extraColumns?: Record<string, string>;
   rowIndex: number;
   uploadedAt: Date;
 }
@@ -79,6 +80,7 @@ export interface ParsedRow {
   firstName: string;
   phone: string;
   notes?: string;
+  extraColumns?: Record<string, string>;
   rowIndex: number;
 }
 
@@ -126,6 +128,7 @@ export interface BatchDetail {
       firstName: string;
       phone: string;
       notes?: string;
+      extraColumns?: Record<string, string>;
       rowIndex: number;
     }>;
   }>;

@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 const phoneRegex = /^\+?[1-9]\d{6,14}$/;
 
-// Sanitize notes to prevent CSV injection
-function sanitizeNotes(value: string): string {
+// Sanitize a value to prevent CSV injection
+function sanitizeValue(value: string): string {
   const dangerousPrefixes = ['=', '+', '-', '@', '\t', '\r'];
   let sanitized = value.trim();
   if (dangerousPrefixes.some((p) => sanitized.startsWith(p))) {
@@ -24,7 +24,18 @@ export const uploadRowSchema = z.object({
   notes: z
     .string()
     .optional()
-    .transform((v) => (v ? sanitizeNotes(v) : undefined)),
+    .transform((v) => (v ? sanitizeValue(v) : undefined)),
+  // Store all extra columns that don't map to the 3 canonical fields
+  extraColumns: z
+    .record(z.string(), z.string())
+    .optional()
+    .transform((rec) => {
+      if (!rec) return undefined;
+      // Sanitize every extra column value
+      return Object.fromEntries(
+        Object.entries(rec).map(([k, v]) => [k, sanitizeValue(v)])
+      );
+    }),
   rowIndex: z.number().int().nonnegative(),
 });
 
