@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { createAgentSchema } from '@/lib/validations/user';
 import { getSession } from '@/lib/auth';
 import type { ApiResponse, SafeUser } from '@/types';
+
+// Disable static caching — always query MongoDB live
+export const dynamic = 'force-dynamic';
 
 // GET /api/agents — List agents
 export async function GET(request: Request): Promise<NextResponse<ApiResponse<SafeUser[]>>> {
@@ -19,7 +23,8 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Sa
     const filter: Record<string, unknown> = { role: 'agent' };
     
     if (role === 'admin' && userId) {
-      filter.createdBy = userId;
+      // Cast userId string to ObjectId so Mongoose matches correctly
+      filter.createdBy = new mongoose.Types.ObjectId(userId);
     }
 
     if (activeOnly) {

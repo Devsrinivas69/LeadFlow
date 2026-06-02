@@ -93,11 +93,13 @@ async function seed() {
 
   console.log('Creating users:\n');
 
+  let adminId: unknown = null;
+
   for (const user of users) {
     const hashedPassword = await bcrypt.hash(user.password, 12);
     const now = new Date();
 
-    const result = await usersCollection.insertOne({
+    const doc: Record<string, unknown> = {
       name: user.name,
       email: user.email,
       password: hashedPassword,
@@ -106,7 +108,19 @@ async function seed() {
       isActive: user.isActive,
       createdAt: now,
       updatedAt: now,
-    });
+    };
+
+    // Link agents to the admin via createdBy
+    if (user.role === 'agent' && adminId) {
+      doc.createdBy = adminId;
+    }
+
+    const result = await usersCollection.insertOne(doc);
+
+    // Capture the admin's generated _id
+    if (user.role === 'admin') {
+      adminId = result.insertedId;
+    }
 
     console.log(
       `   ✅ ${user.role.toUpperCase().padEnd(6)} ${user.name.padEnd(20)} ${user.email.padEnd(35)} ID: ${result.insertedId}`
