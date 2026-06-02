@@ -1,0 +1,23 @@
+import { NextResponse } from 'next/server';
+import { COOKIE_NAME } from '@/lib/auth';
+import type { ApiResponse } from '@/types';
+
+export async function POST(): Promise<NextResponse<ApiResponse>> {
+  const response = NextResponse.json(
+    {
+      success: true,
+      message: 'Logged out successfully',
+    },
+    { status: 200 }
+  );
+
+  response.cookies.set(COOKIE_NAME, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 0,
+    path: '/',
+  });
+
+  return response;
+}
