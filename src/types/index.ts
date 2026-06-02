@@ -132,7 +132,7 @@ export interface BatchDetail {
 }
 
 // ─── Client State ────────────────────────────────────────────────────────────
-export type UploadStep = 'dropzone' | 'preview' | 'confirm' | 'results';
+export type UploadStep = 'dropzone' | 'mapping' | 'preview' | 'confirm' | 'results';
 
 export interface AuthContextType {
   user: SafeUser | null;

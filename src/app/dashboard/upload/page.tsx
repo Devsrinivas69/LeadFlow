@@ -4,10 +4,14 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { DropZone } from '@/components/upload/DropZone';
+import { ColumnMapper } from '@/components/upload/ColumnMapper';
 import { PreviewTable } from '@/components/upload/PreviewTable';
 import { DistributionSummary } from '@/components/upload/DistributionSummary';
 import { UploadResults } from '@/components/upload/UploadResults';
 import { useUpload } from '@/hooks/useUpload';
+
+const STEPS = ['Upload File', 'Map Columns', 'Preview Data', 'Confirm', 'Results'];
+const STEP_KEYS = ['dropzone', 'mapping', 'preview', 'confirm', 'results'];
 
 export default function UploadPage() {
   const {
@@ -20,7 +24,9 @@ export default function UploadPage() {
     uploading,
     uploadResult,
     parseError,
+    mappingResult,
     parseFile,
+    confirmMapping,
     uploadRows,
     reset,
   } = useUpload();
@@ -34,55 +40,51 @@ export default function UploadPage() {
     }
   };
 
+  const currentIndex = STEP_KEYS.indexOf(step);
+
   return (
     <PageContainer
       title="Upload Leads"
       description="Upload a CSV or Excel file to distribute leads across your sales agents."
     >
       {/* Step indicator */}
-      <div className="flex items-center gap-2 mb-6">
-        {['Upload File', 'Preview Data', 'Confirm', 'Results'].map(
-          (label, i) => {
-            const stepMap = ['dropzone', 'preview', 'confirm', 'results'];
-            const currentIndex = stepMap.indexOf(step);
-            const isActive = i === currentIndex;
-            const isCompleted = i < currentIndex;
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        {STEPS.map((label, i) => {
+          const isActive = i === currentIndex;
+          const isCompleted = i < currentIndex;
 
-            return (
-              <div key={label} className="flex items-center gap-2">
-                {i > 0 && (
-                  <div
-                    className={`h-px w-8 ${
-                      isCompleted ? 'bg-indigo-500' : 'bg-slate-200'
-                    }`}
-                  />
-                )}
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors ${
-                      isActive
-                        ? 'bg-indigo-600 text-white'
-                        : isCompleted
-                        ? 'bg-indigo-100 text-indigo-700'
-                        : 'bg-slate-100 text-slate-400'
-                    }`}
-                  >
-                    {isCompleted ? '✓' : i + 1}
-                  </div>
-                  <span
-                    className={`text-sm hidden sm:inline ${
-                      isActive
-                        ? 'font-medium text-slate-900'
-                        : 'text-slate-400'
-                    }`}
-                  >
-                    {label}
-                  </span>
+          return (
+            <div key={label} className="flex items-center gap-2">
+              {i > 0 && (
+                <div
+                  className={`h-px w-8 ${
+                    isCompleted ? 'bg-indigo-500' : 'bg-slate-200'
+                  }`}
+                />
+              )}
+              <div className="flex items-center gap-2">
+                <div
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors ${
+                    isActive
+                      ? 'bg-indigo-600 text-white'
+                      : isCompleted
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                >
+                  {isCompleted ? '✓' : i + 1}
                 </div>
+                <span
+                  className={`text-sm hidden sm:inline ${
+                    isActive ? 'font-medium text-slate-900' : 'text-slate-400'
+                  }`}
+                >
+                  {label}
+                </span>
               </div>
-            );
-          }
-        )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Step Content */}
@@ -94,6 +96,15 @@ export default function UploadPage() {
             fileSize={fileSize}
             error={parseError}
             onClear={reset}
+          />
+        )}
+
+        {step === 'mapping' && mappingResult && (
+          <ColumnMapper
+            fileName={fileName}
+            mappingResult={mappingResult}
+            onConfirm={(overriddenMap) => confirmMapping(overriddenMap)}
+            onCancel={reset}
           />
         )}
 

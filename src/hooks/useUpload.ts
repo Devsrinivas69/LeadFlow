@@ -3,6 +3,8 @@
 import { useState, useCallback } from 'react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
+import { mapHeaders, CANONICAL_LABELS } from '@/lib/columnMapping';
+import type { CanonicalField, MappingResult } from '@/lib/columnMapping';
 import type {
   UploadStep,
   ValidatedRow,
@@ -25,26 +27,14 @@ export function useUpload() {
   const [uploadResult, setUploadResult] = useState<UploadResponse | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
 
+  // Raw data held until column mapping is confirmed
+  const [pendingRawRows, setPendingRawRows] = useState<RawRow[]>([]);
+  const [mappingResult, setMappingResult] = useState<MappingResult | null>(null);
+
   const validRows = rows.filter((r) => r.isValid);
   const invalidRows = rows.filter((r) => !r.isValid);
 
-  const normalizeHeaders = (headers: string[]): Map<string, string> => {
-    const headerMap = new Map<string, string>();
-
-    for (const h of headers) {
-      const normalized = h.trim().toLowerCase().replace(/[\s_-]+/g, '');
-      if (normalized === 'firstname' || normalized === 'first_name' || normalized === 'name') {
-        headerMap.set(h, 'firstName');
-      } else if (normalized === 'phone' || normalized === 'phonenumber' || normalized === 'mobile' || normalized === 'mobilenumber') {
-        headerMap.set(h, 'phone');
-      } else if (normalized === 'notes' || normalized === 'note' || normalized === 'comment' || normalized === 'comments') {
-        headerMap.set(h, 'notes');
-      }
-    }
-
-    return headerMap;
-  };
-
+  // ─── Row validation ─────────────────────────────────────────────────────────
   const validateRow = (
     row: { firstName?: string; phone?: string; notes?: string },
     index: number
@@ -54,9 +44,7 @@ export function useUpload() {
     const phone = (row.phone || '').trim();
     const notes = (row.notes || '').trim();
 
-    if (!firstName) {
-      errors.push('First name is required');
-    }
+    if (!firstName) errors.push('First name is required');
     if (!phone) {
       errors.push('Phone number is required');
     } else if (!PHONE_REGEX.test(phone)) {
@@ -73,41 +61,80 @@ export function useUpload() {
     };
   };
 
-  const processRows = useCallback((rawRows: RawRow[], headers: string[]) => {
-    const headerMap = normalizeHeaders(headers);
+  // ─── Convert raw rows using a confirmed header map ──────────────────────────
+  const applyMapping = useCallback(
+    (rawRows: RawRow[], headerMap: Map<string, CanonicalField>) => {
+      const validated = rawRows.map((raw, index) => {
+        const mapped: { firstName?: string; phone?: string; notes?: string } = {};
+        for (const [originalHeader, field] of headerMap.entries()) {
+          if (field === 'firstName') mapped.firstName = raw[originalHeader];
+          if (field === 'phone') mapped.phone = raw[originalHeader];
+          if (field === 'notes') mapped.notes = raw[originalHeader];
+        }
+        return validateRow(mapped, index);
+      });
 
-    const hasFirstName = Array.from(headerMap.values()).includes('firstName');
-    const hasPhone = Array.from(headerMap.values()).includes('phone');
-    const hasNotes = Array.from(headerMap.values()).includes('notes');
+      setRows(validated);
+      setParseError(null);
+      setStep('preview');
+    },
+    []
+  );
 
-    if (!hasFirstName || !hasPhone || !hasNotes) {
-      const missing: string[] = [];
-      if (!hasFirstName) missing.push('FirstName');
-      if (!hasPhone) missing.push('Phone');
-      if (!hasNotes) missing.push('Notes');
-      setParseError(
-        `Your file is missing required columns: ${missing.join(', ')}. Expected: FirstName, Phone, Notes`
-      );
-      return;
-    }
+  // ─── Called after user confirms mapping in the UI ───────────────────────────
+  const confirmMapping = useCallback(
+    (overriddenMap?: Map<string, CanonicalField>) => {
+      if (!mappingResult || pendingRawRows.length === 0) return;
+      const headerMap = overriddenMap ?? mappingResult.headerMap;
+      applyMapping(pendingRawRows, headerMap);
+      // Clear pending state
+      setPendingRawRows([]);
+      setMappingResult(null);
+    },
+    [mappingResult, pendingRawRows, applyMapping]
+  );
 
-    const validated = rawRows.map((raw, index) => {
-      const mapped: { firstName?: string; phone?: string; notes?: string } = {};
-
-      for (const [originalHeader, mappedField] of headerMap.entries()) {
-        if (mappedField === 'firstName') mapped.firstName = raw[originalHeader];
-        if (mappedField === 'phone') mapped.phone = raw[originalHeader];
-        if (mappedField === 'notes') mapped.notes = raw[originalHeader];
+  // ─── Core parse handler ─────────────────────────────────────────────────────
+  const processRows = useCallback(
+    (rawRows: RawRow[], headers: string[]) => {
+      if (rawRows.length === 0) {
+        setParseError('The file appears to be empty.');
+        return;
       }
 
-      return validateRow(mapped, index);
-    });
+      const result = mapHeaders(headers);
 
-    setRows(validated);
-    setParseError(null);
-    setStep('preview');
-  }, []);
+      if (!result.isComplete) {
+        // Tell the user which fields we couldn't auto-detect
+        const missingLabels = result.missing
+          .map((f) => CANONICAL_LABELS[f])
+          .join(', ');
+        setParseError(
+          `Unable to identify required columns automatically: ${missingLabels}. ` +
+            `Please map the columns below or rename them in your file.`
+        );
+        // Still show the mapping UI so they can fix it manually
+        setPendingRawRows(rawRows);
+        setMappingResult(result);
+        setStep('mapping' as UploadStep);
+        return;
+      }
 
+      if (result.needsConfirmation) {
+        // Synonym / fuzzy match — ask user to confirm before processing
+        setPendingRawRows(rawRows);
+        setMappingResult(result);
+        setStep('mapping' as UploadStep);
+        return;
+      }
+
+      // Exact / normalized match — proceed silently
+      applyMapping(rawRows, result.headerMap);
+    },
+    [applyMapping]
+  );
+
+  // ─── File parsing ───────────────────────────────────────────────────────────
   const parseFile = useCallback(
     (file: File) => {
       setFileName(file.name);
@@ -167,6 +194,7 @@ export function useUpload() {
     [processRows]
   );
 
+  // ─── Upload ─────────────────────────────────────────────────────────────────
   const uploadRows = useCallback(
     async (batchLabel?: string): Promise<ApiResponse<UploadResponse>> => {
       setUploading(true);
@@ -208,6 +236,7 @@ export function useUpload() {
     [validRows]
   );
 
+  // ─── Reset ──────────────────────────────────────────────────────────────────
   const reset = useCallback(() => {
     setStep('dropzone');
     setFileName('');
@@ -216,6 +245,8 @@ export function useUpload() {
     setUploadResult(null);
     setParseError(null);
     setUploading(false);
+    setPendingRawRows([]);
+    setMappingResult(null);
   }, []);
 
   return {
@@ -229,7 +260,9 @@ export function useUpload() {
     uploading,
     uploadResult,
     parseError,
+    mappingResult,
     parseFile,
+    confirmMapping,
     uploadRows,
     reset,
   };
