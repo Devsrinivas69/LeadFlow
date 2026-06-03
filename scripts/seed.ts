@@ -29,7 +29,7 @@ async function seed() {
     process.exit(1);
   }
 
-  const usersCollection = db.collection('users');
+  const usersCollection = db!.collection('users');
 
   // Check if already seeded
   const existingAdmin = await usersCollection.findOne({ email: 'admin@leadflow.com' });
